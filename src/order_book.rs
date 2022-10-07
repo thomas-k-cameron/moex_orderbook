@@ -10,6 +10,7 @@ pub struct OrderBook {
 
 #[derive(Default)]
 pub struct OrderStack {
+    /// {OrderLog::id => OrderLog}
     pub map: HashMap<i64, OrderLog>,
     /// stack is here to track order position
     pub set: Vec<i64>,
@@ -19,7 +20,7 @@ impl OrderStack {
     pub(crate) fn remove_by_id(&mut self, id: &i64) -> bool {
         if let Some(i) = self.map.remove(&id) {
             if let Some((idx, _)) = self.set.iter().enumerate().find(|(_, item)| **item == i.id) {
-                self.set.swap_remove(idx);
+                self.set.remove(idx);
                 return true
             }
         }

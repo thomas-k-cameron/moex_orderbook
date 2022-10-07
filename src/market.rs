@@ -1,7 +1,7 @@
 use crate::crate_prelude::*;
 
 pub struct Market {
-    books: HashMap<OrderBookId, OrderBook>,
+    pub books: HashMap<OrderBookId, OrderBook>,
 }
 impl Market {
     pub fn handle(&mut self, log: OrderLog) -> Option<OrderLog> {
