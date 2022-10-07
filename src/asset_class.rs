@@ -1,5 +1,3 @@
-use std::default;
-
 use crate::derivative_type::DerivativeType;
 
 #[derive(Debug, Default, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Copy)]
