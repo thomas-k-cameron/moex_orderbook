@@ -4,8 +4,9 @@ use crate::derivative_type::DerivativeType;
 
 #[derive(Debug, Default, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Copy)]
 pub enum AssetClass {
-    #[default]EquityOrFX,
-    Derivative(DerivativeType)
+    #[default]
+    EquityOrFX,
+    Derivative(DerivativeType),
 }
 
 impl AssetClass {

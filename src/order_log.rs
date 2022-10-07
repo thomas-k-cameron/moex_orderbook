@@ -1,5 +1,6 @@
 pub use crate::*;
 
+#[derive(Debug)]
 pub struct OrderLog {
     /// time/moment
     pub timestamp: NaiveDateTime,
@@ -9,11 +10,10 @@ pub struct OrderLog {
     pub id: i64,
     pub action: Action,
     pub price: Price,
-    pub volume: NonZeroI64,
+    pub volume: i64,
     pub name: String,
-    pub asset_class: AssetClass
+    pub asset_class: AssetClass,
 }
-
 
 impl OrderLog {
     pub fn new(s: &str) -> Option<Self> {
@@ -23,10 +23,10 @@ impl OrderLog {
                 let c = system_or_seccode.chars().next()?;
                 match c {
                     'F' | 'C' | 'P' => true,
-                     _ => false
+                    _ => false,
                 }
             } else {
-                return None
+                return None;
             };
             check
         };
@@ -50,17 +50,17 @@ impl OrderLog {
                     Price::Limit(decimal)
                 }
             };
-            let volume = iter.next()?.parse::<NonZeroI64>().ok()?;
+            let volume = iter.next()?.parse::<i64>().ok()?;
             let action = match iter.next()? {
                 "" if action_byte == "0" => Action::Cancel,
                 "" if action_byte == "1" => Action::Add,
                 trade_id => {
                     let price = iter.next()?.parse::<i64>().ok()?;
                     let id = trade_id.parse::<i64>().ok()?;
-                    Action::Trade(TradeLog {price,id})
-                },
+                    Action::Trade(TradeLog { price, id })
+                }
             };
-            
+
             OrderLog {
                 name: symbol.to_string(),
                 asset_class: system,
@@ -69,7 +69,7 @@ impl OrderLog {
                 price,
                 volume,
                 timestamp: moment,
-                id
+                id,
             }
         } else {
             let _sequence_number = iter.next()?.parse::<i64>().ok()?;
@@ -87,15 +87,15 @@ impl OrderLog {
                     Price::Limit(decimal)
                 }
             };
-            let volume = iter.next()?.parse::<NonZeroI64>().ok()?;
+            let volume = iter.next()?.parse::<i64>().ok()?;
             let action = match iter.next()? {
                 "" if action_byte == "0" => Action::Cancel,
                 "" if action_byte == "1" => Action::Add,
                 trade_id => {
                     let price = iter.next()?.parse::<i64>().ok()?;
                     let id = trade_id.parse::<i64>().ok()?;
-                    Action::Trade(TradeLog {price,id})
-                },
+                    Action::Trade(TradeLog { price, id })
+                }
             };
             OrderLog {
                 name: sec_code,
@@ -105,7 +105,7 @@ impl OrderLog {
                 action,
                 volume,
                 price,
-                asset_class: AssetClass::EquityOrFX
+                asset_class: AssetClass::EquityOrFX,
             }
         };
 
