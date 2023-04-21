@@ -10,6 +10,7 @@ pub(crate) mod crate_prelude {
     };
     
 }
+mod utils;
 mod order_book_id;
 pub use order_book_id::OrderBookId;
 mod price;
@@ -24,8 +25,8 @@ mod asset_class;
 pub use asset_class::AssetClass;
 mod trade_log;
 pub use trade_log::TradeLog;
-mod order_log;
-pub use order_log::OrderLog;
+mod derivative_order_log;
+pub use derivative_order_log::DerivativeOrderLog;
 use rust_decimal::Decimal;
 mod order_book;
 pub use order_book::OrderBook;

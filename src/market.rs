@@ -4,10 +4,10 @@ pub struct Market {
     pub books: HashMap<OrderBookId, OrderBook>,
 }
 impl Market {
-    pub fn handle(&mut self, log: OrderLog) -> Option<OrderLog> {
+    pub fn handle(&mut self, log: DerivativeOrderLog) -> Option<DerivativeOrderLog> {
         let id = OrderBookId {
             name: log.name.to_string(),
-            asset_class: log.asset_class,
+            asset_class: Default::default(),
         };
         let book = if let Some(s) = self.books.get_mut(&id) {
             s

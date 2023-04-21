@@ -5,13 +5,13 @@ pub struct OrderBook {
     pub id: OrderBookId,
     pub asks: BTreeMap<Decimal, OrderStack>,
     pub bids: BTreeMap<Decimal, OrderStack>,
-    pub remaining_market_orders: Vec<OrderLog>,
+    pub remaining_market_orders: Vec<DerivativeOrderLog>,
 }
 
 #[derive(Default)]
 pub struct OrderStack {
     /// {OrderLog::id => OrderLog}
-    pub map: HashMap<i64, OrderLog>,
+    pub map: HashMap<i64, DerivativeOrderLog>,
     /// stack is here to track order position
     pub set: Vec<i64>,
 }
