@@ -29,7 +29,8 @@ impl Market {
 
         match (&log.action, &log.price) {
             (Action::Add, Price::Market) => {
-                book.remaining_market_orders.push(log); // done
+                let check = book.remaining_market_orders.insert(log.id, log); // done
+                assert!(check.is_none(), "{check:#?}");
             }
             (Action::Add, Price::Limit(i)) => {
                 let stack = half_tree.entry(*i).or_insert_with(OrderStack::default);
@@ -38,11 +39,7 @@ impl Market {
                 // done
             }
             (Action::Cancel, Price::Market) => {
-                if let Some(i) = book
-                    .remaining_market_orders
-                    .drain_filter(|i| i.id == log.id)
-                    .next()
-                {
+                if let Some(i) = book.remaining_market_orders.remove(&log.id) {
                     return Some(i);
                 } else {
                     unreachable!("{log:#?}");
@@ -56,11 +53,7 @@ impl Market {
                 };
             }
             (Action::Trade(_), Price::Market) => {
-                if let Some(i) = book
-                    .remaining_market_orders
-                    .drain_filter(|i| i.id == log.id)
-                    .next()
-                {
+                if let Some(i) = book.remaining_market_orders.remove(&log.id) {
                     return Some(i);
                     // done!
                 } else {

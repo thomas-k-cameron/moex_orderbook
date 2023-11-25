@@ -5,7 +5,7 @@ pub struct OrderBook {
     pub id: OrderBookId,
     pub asks: BTreeMap<Decimal, OrderStack>,
     pub bids: BTreeMap<Decimal, OrderStack>,
-    pub remaining_market_orders: Vec<DerivativeOrderLog>,
+    pub remaining_market_orders: HashMap<i64, DerivativeOrderLog>,
 }
 
 #[derive(Default)]

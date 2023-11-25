@@ -1,4 +1,3 @@
-#![feature(drain_filter)]
 pub(crate) mod crate_prelude {
     pub use chrono::NaiveDateTime;
     pub use super::*;
