@@ -6,7 +6,7 @@ pub struct Market {
 impl Market {
     pub fn handle(&mut self, log: DerivativeOrderLog) -> Option<DerivativeOrderLog> {
         let id = OrderBookId {
-            name: log.name.to_string(),
+            name: log.name.to_string().into_boxed_str(),
             asset_class: Default::default(),
         };
         let book = if let Some(s) = self.books.get_mut(&id) {
@@ -34,8 +34,7 @@ impl Market {
             }
             (Action::Add, Price::Limit(i)) => {
                 let stack = half_tree.entry(*i).or_insert_with(OrderStack::default);
-                stack.set.push(log.id);
-                stack.map.insert(log.id, log);
+                stack.add(log);
                 // done
             }
             (Action::Cancel, Price::Market) => {

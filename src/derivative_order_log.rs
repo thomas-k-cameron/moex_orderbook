@@ -15,7 +15,6 @@ pub struct DerivativeOrderLog {
     pub derivative_type: DerivativeType,
 }
 
-
 impl DerivativeOrderLog {
     // #SYMBOL,SYSTEM,TYPE,MOMENT,ID,ACTION,PRICE,VOLUME,ID_DEAL,PRICE_DEAL
     pub fn new(s: &str) -> Option<Self> {
@@ -30,7 +29,7 @@ impl DerivativeOrderLog {
         let action_byte = iter.next()?;
         let price = {
             let decimal = iter.next()?.parse::<Decimal>();
-            if let Ok(n) = decimal { 
+            if let Ok(n) = decimal {
                 Price::Limit(n)
             } else {
                 Price::Market
@@ -59,7 +58,6 @@ impl DerivativeOrderLog {
         })
     }
 }
-
 
 #[cfg(test)]
 mod test {

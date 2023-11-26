@@ -1,16 +1,17 @@
 pub(crate) mod crate_prelude {
-    pub use chrono::NaiveDateTime;
-    pub use super::*;
-    pub use std::str::FromStr;
     pub use std::collections::{
         BTreeMap,
         HashMap,
         HashSet,
     };
-    
+    pub use std::str::FromStr;
+
+    pub use chrono::NaiveDateTime;
+
+    pub use super::*;
 }
-mod utils;
 mod order_book_id;
+mod utils;
 pub use order_book_id::OrderBookId;
 mod price;
 pub use price::Price;
@@ -28,8 +29,10 @@ mod derivative_order_log;
 pub use derivative_order_log::DerivativeOrderLog;
 use rust_decimal::Decimal;
 mod order_book;
-pub use order_book::OrderBook;
-pub use order_book::OrderStack;
+pub use order_book::{
+    OrderBook,
+    OrderStack,
+};
 
 mod market;
 pub use market::Market;

@@ -17,11 +17,19 @@ pub struct OrderStack {
 }
 
 impl OrderStack {
+    pub(crate) fn add(&mut self, log: DerivativeOrderLog) {
+        self.set.push(log.id);
+        self.map.insert(log.id, log);
+    }
+
     pub(crate) fn remove_by_id(&mut self, id: &i64) -> bool {
         if let Some(i) = self.map.remove(&id) {
-            if let Some((idx, _)) = self.set.iter().enumerate().find(|(_, item)| **item == i.id) {
+            if let Ok(idx) = self.set.binary_search_by(|item| item.cmp(&i.id)) {
                 self.set.remove(idx);
-                return true
+            } else {
+                if cfg!(dev) {
+                    unimplemented!()
+                };
             }
         }
         false
