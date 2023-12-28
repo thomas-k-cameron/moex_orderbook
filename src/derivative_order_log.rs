@@ -1,6 +1,6 @@
 pub use crate::crate_prelude::*;
 
-#[derive(Debug)]
+#[derive(Debug, serde::Serialize)]
 pub struct DerivativeOrderLog {
     /// time/moment
     pub timestamp: NaiveDateTime,
@@ -13,6 +13,7 @@ pub struct DerivativeOrderLog {
     pub volume: i64,
     pub name: String,
     pub derivative_type: DerivativeType,
+    pub trade_log: Option<TradeLog>,
 }
 
 impl Default for DerivativeOrderLog {
@@ -26,6 +27,7 @@ impl Default for DerivativeOrderLog {
             volume: 0,
             name: "nah".to_string(),
             derivative_type: DerivativeType::Call,
+            trade_log: None
         }
     }
 }
@@ -51,14 +53,17 @@ impl DerivativeOrderLog {
                 Price::Market
             }
         };
+
         let volume = iter.next()?.parse::<i64>().ok()?;
+        let mut trade_log = None;
         let action = match iter.next()? {
             "" if action_byte == "0" => Action::Cancel,
             "" if action_byte == "1" => Action::Add,
-            trade_id => {
+            trade_id_str => {
                 let price = iter.next()?.parse::<i64>().ok()?;
-                let id = trade_id.parse::<i64>().ok()?;
-                Action::Trade(TradeLog { price, id })
+                let id = trade_id_str.parse::<i64>().ok()?;
+                trade_log.replace(TradeLog { price, id });
+                Action::Trade
             }
         };
 
@@ -71,6 +76,7 @@ impl DerivativeOrderLog {
             volume,
             timestamp: moment,
             id,
+            trade_log,
         })
     }
 }

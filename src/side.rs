@@ -1,6 +1,6 @@
 use std::str::FromStr;
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, serde::Serialize)]
 pub enum Side {
     #[default]
     Buy,

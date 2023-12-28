@@ -51,7 +51,7 @@ impl Market {
                     unreachable!("{log:#?}")
                 };
             }
-            (Action::Trade(_), Price::Market) => {
+            (Action::Trade, Price::Market) => {
                 if let Some(i) = book.remaining_market_orders.remove(&log.id) {
                     return Some(i);
                     // done!
@@ -59,7 +59,7 @@ impl Market {
                     unreachable!("{log:#?}");
                 };
             }
-            (Action::Trade(_trade), Price::Limit(l)) => {
+            (Action::Trade, Price::Limit(l)) => {
                 if let Some(stack) = half_tree.get_mut(l) {
                     if let Some(to_mut) = stack.map.get_mut(&log.id) {
                         if to_mut.volume == log.volume {
