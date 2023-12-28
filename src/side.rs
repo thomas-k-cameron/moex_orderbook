@@ -1,7 +1,8 @@
 use std::str::FromStr;
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub enum Side {
+    #[default]
     Buy,
     Sell,
 }
