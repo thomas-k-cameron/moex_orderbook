@@ -2,7 +2,6 @@ pub(crate) mod crate_prelude {
     pub use std::collections::{
         BTreeMap,
         HashMap,
-        HashSet,
     };
     pub use std::str::FromStr;
 
@@ -11,7 +10,7 @@ pub(crate) mod crate_prelude {
     pub use super::*;
 }
 mod order_book_id;
-mod utils;
+
 pub use order_book_id::OrderBookId;
 mod price;
 pub use price::Price;
