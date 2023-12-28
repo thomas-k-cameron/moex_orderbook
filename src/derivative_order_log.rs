@@ -15,11 +15,27 @@ pub struct DerivativeOrderLog {
     pub derivative_type: DerivativeType,
 }
 
+impl Default for DerivativeOrderLog {
+    fn default() -> Self {
+        Self {
+            timestamp: NaiveDateTime::MIN,
+            side: Side::Buy,
+            id: 0,
+            action: Action::Add,
+            price: Price::Market,
+            volume: 0,
+            name: "nah".to_string(),
+            derivative_type: DerivativeType::Call,
+        }
+    }
+}
+
 impl DerivativeOrderLog {
     // #SYMBOL,SYSTEM,TYPE,MOMENT,ID,ACTION,PRICE,VOLUME,ID_DEAL,PRICE_DEAL
     pub fn new(s: &str) -> Option<Self> {
         let timestamp_fmt = "%Y%m%d%H%M%S%f";
         let mut iter = s.split(",");
+
         // name of the variables matches the `field name` written on the specification
         let symbol = iter.next()?;
         let system: DerivativeType = iter.next()?.try_into().ok()?;
