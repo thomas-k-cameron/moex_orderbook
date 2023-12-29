@@ -25,7 +25,7 @@ impl Default for DerivativeOrderLog {
             action: Action::Add,
             price: Price::Market,
             volume: 0,
-            name: "nah".to_string(),
+            name: "".to_string(),
             derivative_type: DerivativeType::Call,
             trade_log: None
         }
