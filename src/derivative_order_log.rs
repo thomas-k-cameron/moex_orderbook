@@ -19,7 +19,7 @@ pub struct DerivativeOrderLog {
 impl Default for DerivativeOrderLog {
     fn default() -> Self {
         Self {
-            timestamp: NaiveDateTime::MIN,
+            timestamp: NaiveDateTime::MAX,
             side: Side::Buy,
             id: 0,
             action: Action::Add,
@@ -83,7 +83,6 @@ impl DerivativeOrderLog {
 
 #[cfg(test)]
 mod test {
-    use super::*;
     use crate::DerivativeOrderLog;
 
     #[test]
