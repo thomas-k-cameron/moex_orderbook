@@ -1,9 +1,15 @@
+use std::str::FromStr;
+
+use chrono::NaiveDateTime;
+
+use crate::*;
+
 pub struct EquityOrderLog {
-    no: i32,
-    seccode: String,
+    no: u64,
+    seccode: Box<str>,
     buysell: Side,
     time: NaiveDateTime,
-    orderno: i32,
+    orderno: u64,
     action: Action,
     price: Price,
     volume: i64,
@@ -14,11 +20,11 @@ impl EquityOrderLog {
         let mut iter = s.split(",");
         let timestamp_fmt = "%Y%m%d%H%M%S%f";
 
-        let _sequence_number = iter.next()?.parse::<i64>().ok()?;
-        let sec_code = iter.next()?.to_string();
-        let buy_sell = Side::from_str(iter.next()?).ok()?;
+        let no = iter.next()?.parse::<u64>().ok()?;
+        let seccode = iter.next()?.to_string().into_boxed_str();
+        let buysell = Side::from_str(iter.next()?).ok()?;
         let time = NaiveDateTime::parse_from_str(iter.next()?, timestamp_fmt).ok()?;
-        let order_no = iter.next()?.parse::<i64>().ok()?;
+        let orderno = iter.next()?.parse::<u64>().ok()?;
         let action_byte = iter.next()?;
         let price = {
             let n = iter.next()?;
@@ -40,7 +46,14 @@ impl EquityOrderLog {
             }
         };
         Some(Self {
-            sec_code
+            no,
+            seccode,
+            buysell,
+            time,
+            orderno,
+            action,
+            price,
+            volume,
         })
     }
 }

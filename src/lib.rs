@@ -35,3 +35,6 @@ pub use order_book::{
 
 mod market;
 pub use market::Market;
+
+mod equity_order_log;
+pub use equity_order_log::EquityOrderLog;

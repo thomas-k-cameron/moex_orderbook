@@ -27,7 +27,7 @@ impl Default for DerivativeOrderLog {
             volume: 0,
             name: "".to_string(),
             derivative_type: DerivativeType::Call,
-            trade_log: None
+            trade_log: None,
         }
     }
 }
@@ -62,8 +62,7 @@ impl DerivativeOrderLog {
             trade_id_str => {
                 let price = iter.next()?.parse::<i64>().ok()?;
                 let id = trade_id_str.parse::<i64>().ok()?;
-                trade_log.replace(TradeLog { price, id });
-                Action::Trade
+                Action::Trade(TradeLog { price, id })
             }
         };
 
