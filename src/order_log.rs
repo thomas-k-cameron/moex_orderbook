@@ -4,6 +4,7 @@ use chrono::NaiveTime;
 
 use crate::*;
 
+#[derive(Debug, Default, serde::Serialize, Clone, serde::Deserialize, PartialEq, Eq, PartialOrd, Ord)]
 pub struct OrderLog {
     pub no: u64,
     pub seccode: Box<str>,

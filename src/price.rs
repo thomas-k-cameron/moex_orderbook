@@ -1,9 +1,10 @@
 use rust_decimal::Decimal;
 
-#[derive(Debug, serde::Serialize, PartialEq, Eq, PartialOrd, Ord, Clone, Copy)]
+#[derive(Debug, Default, serde::Serialize, Clone, Copy, serde::Deserialize, PartialEq, Eq, PartialOrd, Ord)]
 #[serde(tag = "price_type", content = "limit_price")]
 pub enum Price {
     Limit(Decimal),
+    #[default]
     Market,
 }
 

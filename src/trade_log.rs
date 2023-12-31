@@ -1,4 +1,4 @@
-#[derive(Debug, Clone, Copy, serde::Serialize)]
+#[derive(Debug, Default, serde::Serialize, Clone, Copy, serde::Deserialize, PartialEq, Eq, PartialOrd, Ord)]
 pub struct TradeLog {
     /// price the order was executed at
     /// TRADEPRICE/PRICE_DEAL
