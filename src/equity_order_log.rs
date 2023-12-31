@@ -5,14 +5,14 @@ use chrono::NaiveDateTime;
 use crate::*;
 
 pub struct EquityOrderLog {
-    no: u64,
-    seccode: Box<str>,
-    buysell: Side,
-    time: NaiveDateTime,
-    orderno: u64,
-    action: Action,
-    price: Price,
-    volume: i64,
+    pub no: u64,
+    pub seccode: Box<str>,
+    pub buysell: Side,
+    pub time: NaiveDateTime,
+    pub orderno: u64,
+    pub action: Action,
+    pub price: Price,
+    pub volume: i64,
 }
 
 impl EquityOrderLog {
