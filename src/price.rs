@@ -11,7 +11,7 @@ impl Price {
     pub fn as_limit(&self) -> Option<&Decimal> {
         match &self {
             Self::Limit(d) => Some(d),
-            _ => None
+            _ => None,
         }
     }
 }

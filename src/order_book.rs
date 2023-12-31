@@ -89,7 +89,6 @@ impl OrderStack {
     pub(crate) fn remove_by_id(&mut self, id: &i64) -> Option<DerivativeOrderLog> {
         if let Ok(idx) = self.set.binary_search_by(|item| item.cmp(&id)) {
             self.set.remove(idx);
-            
         } else {
             if cfg!(dev) {
                 unimplemented!()

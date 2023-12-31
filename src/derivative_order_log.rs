@@ -13,7 +13,6 @@ pub struct DerivativeOrderLog {
     pub volume: i64,
     pub name: Box<str>,
     pub derivative_type: DerivativeType,
-    pub trade_log: Option<TradeLog>,
 }
 
 impl Default for DerivativeOrderLog {
@@ -27,7 +26,6 @@ impl Default for DerivativeOrderLog {
             volume: 0,
             name: "".to_string().into_boxed_str(),
             derivative_type: DerivativeType::Call,
-            trade_log: None,
         }
     }
 }
@@ -55,7 +53,6 @@ impl DerivativeOrderLog {
         };
 
         let volume = iter.next()?.parse::<i64>().ok()?;
-        let mut trade_log = None;
         let action = match iter.next()? {
             "" if action_byte == "0" => Action::Cancel,
             "" if action_byte == "1" => Action::Add,
@@ -75,7 +72,6 @@ impl DerivativeOrderLog {
             volume,
             timestamp: moment,
             id,
-            trade_log,
         })
     }
 }
