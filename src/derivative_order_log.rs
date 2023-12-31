@@ -11,7 +11,7 @@ pub struct DerivativeOrderLog {
     pub action: Action,
     pub price: Price,
     pub volume: i64,
-    pub name: String,
+    pub name: Box<str>,
     pub derivative_type: DerivativeType,
     pub trade_log: Option<TradeLog>,
 }
@@ -25,7 +25,7 @@ impl Default for DerivativeOrderLog {
             action: Action::Add,
             price: Price::Market,
             volume: 0,
-            name: "".to_string(),
+            name: "".to_string().into_boxed_str(),
             derivative_type: DerivativeType::Call,
             trade_log: None,
         }
@@ -67,7 +67,7 @@ impl DerivativeOrderLog {
         };
 
         Some(DerivativeOrderLog {
-            name: symbol.to_string(),
+            name: symbol.to_string().into_boxed_str(),
             derivative_type: system,
             side: r#type,
             action,

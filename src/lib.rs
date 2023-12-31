@@ -33,7 +33,7 @@ pub use order_book::{
     OrderStack,
 };
 
-mod market;
+
 
 mod equity_order_log;
 pub use equity_order_log::EquityOrderLog;
