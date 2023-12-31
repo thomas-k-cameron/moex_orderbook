@@ -1,6 +1,6 @@
 pub use crate::crate_prelude::*;
 
-#[derive(Debug, serde::Serialize)]
+#[derive(Debug, serde::Serialize, Clone, serde::Deserialize, PartialEq, Eq, PartialOrd, Ord)]
 pub struct DerivativeOrderLog {
     /// time/moment
     pub timestamp: NaiveDateTime,
