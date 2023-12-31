@@ -30,5 +30,5 @@ pub use order_book::{
     OrderStack,
 };
 
-mod equity_order_log;
-pub use equity_order_log::EquityOrderLog;
+mod order_log;
+pub use order_log::OrderLog;

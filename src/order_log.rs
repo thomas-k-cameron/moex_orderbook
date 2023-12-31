@@ -1,29 +1,37 @@
 use std::str::FromStr;
 
-use chrono::NaiveDateTime;
+use chrono::NaiveTime;
 
 use crate::*;
 
-pub struct EquityOrderLog {
+pub struct OrderLog {
     pub no: u64,
     pub seccode: Box<str>,
     pub buysell: Side,
-    pub time: NaiveDateTime,
+    pub time: NaiveTime,
     pub orderno: u64,
     pub action: Action,
     pub price: Price,
     pub volume: i64,
 }
 
-impl EquityOrderLog {
+impl OrderLog {
     pub fn new(s: &str) -> Option<Self> {
         let mut iter = s.split(",");
-        let timestamp_fmt = "%Y%m%d%H%M%S%f";
 
         let no = iter.next()?.parse::<u64>().ok()?;
         let seccode = iter.next()?.to_string().into_boxed_str();
         let buysell = Side::from_str(iter.next()?).ok()?;
-        let time = NaiveDateTime::parse_from_str(iter.next()?, timestamp_fmt).ok()?;
+        let time = {
+            let time_s = iter.next()?;
+            let hour = time_s[..2].parse().ok()?;
+            let min = time_s[2..4].parse().ok()?;
+            let sec = time_s[4..6].parse().ok()?;
+            let micro = time_s[6..12].parse().ok()?;
+            NaiveTime::from_hms_micro_opt(hour, min, sec, micro)
+                .ok_or(())
+                .ok()?
+        };
         let orderno = iter.next()?.parse::<u64>().ok()?;
         let action_byte = iter.next()?;
         let price = {
