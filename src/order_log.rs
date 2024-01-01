@@ -132,5 +132,10 @@ mod test {
         if let Some(i) = OrderLog::new("41008406,K-RM,B,182808327717,19676999,0,4650,180,,") {
             assert!(Some(i.time) == NaiveTime::from_hms_micro_opt(18, 28, 08, 327717));
         };
+
+        if let Some(i) = OrderLog::new("2897654,GE-RM,B,93239262824,1447971,1,7441,100,,") {
+            assert!(Some(i.time) == NaiveTime::from_hms_micro_opt(18, 28, 08, 327717));
+        };
+        
     }
 }
