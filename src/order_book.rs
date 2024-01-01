@@ -90,7 +90,7 @@ impl MoexOrderLog for OrderLog {
 }
 
 #[derive(Default)]
-pub struct OrderBook<T>
+pub struct MoexOrderBook<T>
 where
     T: MoexOrderLog,
 {
@@ -99,7 +99,7 @@ where
     pub bids: Vec<OrderStack<T>>,
 }
 
-impl<T> OrderBook<T>
+impl<T> MoexOrderBook<T>
 where
     T: MoexOrderLog,
 {

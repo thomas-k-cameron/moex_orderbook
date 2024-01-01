@@ -26,7 +26,7 @@ pub use derivative_order_log::DerivativeOrderLog;
 use rust_decimal::Decimal;
 mod order_book;
 pub use order_book::{
-    OrderBook,
+    MoexOrderBook,
     OrderStack,
 };
 
