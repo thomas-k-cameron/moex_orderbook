@@ -64,22 +64,22 @@ impl OrderLog {
                 Price::Limit(n.parse().ok()?)
             }
         };
-        println!("{:?}", price.as_limit());
+        // println!("{:?}", price.as_limit());
         let volume = iter.next()?.parse::<i64>().ok()?;
-        println!("{:?}", volume);
+        // println!("{:?}", volume);
         let a = iter.next()?;
-        println!("{:?}", a);
+        // println!("{:?}", a);
         let action = match a {
             "" if action_byte == "0" => Action::Cancel,
             "" if action_byte == "1" => Action::Add,
             trade_id => {
                 assert_eq!(action_byte, "2");
-                println!("{trade_id}");
+                // println!("{trade_id}");
                 let id = trade_id.parse().ok()?;
-                println!("{id}");
+                // println!("{id}");
                 let price = iter.next()?;
 
-                println!("price: {price}");
+                // println!("price: {price}");
                 let price = price.parse().ok()?;
                 Action::Trade(TradeLog { price, id })
             }
