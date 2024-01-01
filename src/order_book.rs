@@ -11,7 +11,7 @@ pub trait MoexOrderLog: Sized + Send + Clone + Sync {
     fn price<'a>(&'a self) -> &'a Price;
     fn order_no(&self) -> u64;
     fn volume_mut(&mut self) -> &mut i64;
-    fn volume(&mut self) -> i64;
+    fn volume(&self) -> i64;
     fn new_from_str(s: &str) -> Option<Self>;
     fn action(&self) -> Action;
 }
@@ -44,7 +44,7 @@ impl MoexOrderLog for DerivativeOrderLog {
         &self.name
     }
 
-    fn volume(&mut self) -> i64 {
+    fn volume(&self) -> i64 {
         self.volume
     }
 
@@ -85,7 +85,7 @@ impl MoexOrderLog for OrderLog {
         &self.seccode
     }
 
-    fn volume(&mut self) -> i64 {
+    fn volume(&self) -> i64 {
         self.volume
     }
 
@@ -161,7 +161,7 @@ where
         }
     }
 
-    pub fn execute(&mut self, mut log: T) {
+    pub fn execute(&mut self, log: T) {
         let refmut = self.mut_ord_stack(&log.side());
         let res = refmut.binary_search_by_key(&log.price().as_limit(), |a| Some(&a.price));
         match res {
