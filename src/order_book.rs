@@ -3,23 +3,24 @@ use chrono::NaiveTime;
 use crate::crate_prelude::*;
 
 pub trait MoexOrderLog: Sized + Send + Clone + Sync {
-    type T1: Eq + PartialEq + Ord + PartialOrd + Clone + Sized + Send + Sync;
-    type T2: Eq + PartialEq + Ord + PartialOrd + Clone + Sized + Send + Sync;
-    fn timestamp<'a>(&'a self) -> &'a Self::T1;
-    fn ticker<'a>(&'a self) -> &'a Self::T2;
+    type Timestamp: Eq + PartialEq + Ord + PartialOrd + Clone + Sized + Send + Sync;
+    type TickerCode: Eq + PartialEq + Ord + PartialOrd + Clone + Sized + Send + Sync;
+    fn timestamp<'a>(&'a self) -> &'a Self::Timestamp;
+    fn ticker<'a>(&'a self) -> &'a Self::TickerCode;
     fn side<'a>(&'a self) -> &'a Side;
     fn price<'a>(&'a self) -> &'a Price;
     fn order_no(&self) -> u64;
     fn volume_mut(&mut self) -> &mut i64;
     fn volume(&mut self) -> i64;
     fn new_from_str(s: &str) -> Option<Self>;
+    fn action(&self) -> Action;
 }
 
 impl MoexOrderLog for DerivativeOrderLog {
-    type T1 = NaiveDateTime;
-    type T2 = Box<str>;
+    type Timestamp = NaiveDateTime;
+    type TickerCode = Box<str>;
 
-    fn timestamp<'a>(&'a self) -> &'a Self::T1 {
+    fn timestamp<'a>(&'a self) -> &'a Self::Timestamp {
         &self.timestamp
     }
 
@@ -39,7 +40,7 @@ impl MoexOrderLog for DerivativeOrderLog {
         &self.side
     }
 
-    fn ticker<'a>(&'a self) -> &'a Self::T2 {
+    fn ticker<'a>(&'a self) -> &'a Self::TickerCode {
         &self.name
     }
 
@@ -50,11 +51,15 @@ impl MoexOrderLog for DerivativeOrderLog {
     fn volume_mut(&mut self) -> &mut i64 {
         &mut self.volume
     }
+
+    fn action(&self) -> Action {
+        self.action
+    }
 }
 
 impl MoexOrderLog for OrderLog {
-    type T1 = NaiveTime;
-    type T2 = Box<str>;
+    type Timestamp = NaiveTime;
+    type TickerCode = Box<str>;
 
     fn order_no(&self) -> u64 {
         self.orderno
@@ -72,11 +77,11 @@ impl MoexOrderLog for OrderLog {
         Self::new(s)
     }
 
-    fn timestamp<'a>(&'a self) -> &'a Self::T1 {
+    fn timestamp<'a>(&'a self) -> &'a Self::Timestamp {
         &self.time
     }
 
-    fn ticker<'a>(&'a self) -> &'a Self::T2 {
+    fn ticker<'a>(&'a self) -> &'a Self::TickerCode {
         &self.seccode
     }
 
@@ -86,6 +91,10 @@ impl MoexOrderLog for OrderLog {
 
     fn volume_mut(&mut self) -> &mut i64 {
         &mut self.volume
+    }
+
+    fn action(&self) -> Action {
+        self.action
     }
 }
 
