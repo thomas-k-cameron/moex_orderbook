@@ -1,6 +1,9 @@
 use std::str::FromStr;
 
-use chrono::NaiveTime;
+use chrono::{
+    NaiveTime,
+    Timelike,
+};
 
 use crate::*;
 
@@ -27,42 +30,57 @@ impl OrderLog {
         let buysell = Side::from_str(iter.next()?).ok()?;
         let time = {
             let time_s = iter.next()?.parse::<u64>().ok()?;
-            "HHMMSSZZZXXX";
 
             let hour_mul = 10u64.pow(1 + 3 + 3 + 3);
             let hour = time_s / hour_mul;
 
-            let minutes_mul = 10u64.pow(3 + 3 + 3);
+            let minutes_mul = 10u64.pow(2 + 3 + 3);
             let minutes = (time_s - hour * hour_mul) / minutes_mul;
 
             let seconds_mul = 10u64.pow(3 + 3);
             let seconds = (time_s - hour * hour_mul - minutes * minutes_mul) / seconds_mul;
 
-            let micro_mul = 10u64.pow(3);
-            let micro = (time_s - hour * hour_mul - minutes * minutes_mul - seconds * seconds_mul)
-                / micro_mul;
-            NaiveTime::from_hms_micro_opt(hour as u32, minutes as u32, seconds as u32, micro as u32)
-                .ok_or(())
-                .ok()?
+            let subsec_mul = 1u64;
+            let subsec = (time_s - hour * hour_mul - minutes * minutes_mul - seconds * seconds_mul)
+                / subsec_mul;
+
+            NaiveTime::from_hms_micro_opt(
+                hour as u32,
+                minutes as u32,
+                seconds as u32,
+                subsec as u32,
+            )
+            .ok_or(())
+            .ok()?
         };
+
         let orderno = iter.next()?.parse::<u64>().ok()?;
         let action_byte = iter.next()?;
         let price = {
             let n = iter.next()?;
-            let decimal = iter.next()?.parse::<Decimal>().ok()?;
             if n == "0" {
                 Price::Market
             } else {
-                Price::Limit(decimal)
+                Price::Limit(n.parse().ok()?)
             }
         };
+        println!("{:?}", price.as_limit());
         let volume = iter.next()?.parse::<i64>().ok()?;
-        let action = match iter.next()? {
+        println!("{:?}", volume);
+        let a = iter.next()?;
+        println!("{:?}", a);
+        let action = match a {
             "" if action_byte == "0" => Action::Cancel,
             "" if action_byte == "1" => Action::Add,
             trade_id => {
-                let price = iter.next()?.parse::<i64>().ok()?;
-                let id = trade_id.parse::<i64>().ok()?;
+                assert_eq!(action_byte, "2");
+                println!("{trade_id}");
+                let id = trade_id.parse().ok()?;
+                println!("{id}");
+                let price = iter.next()?;
+
+                println!("price: {price}");
+                let price = price.parse().ok()?;
                 Action::Trade(TradeLog { price, id })
             }
         };
@@ -99,9 +117,8 @@ mod test {
             "9,HYDR,B,70000000000,9,1,0.71,25000,,",
         ];
         for i in s {
-            if let Some(i) = OrderLog::new(i) {
-                assert!(Some(i.time) == NaiveTime::from_hms_opt(7, 0, 0));
-            };
+            let o = OrderLog::new(i).map(|i| i.time);
+            assert!(o == NaiveTime::from_hms_micro_opt(7, 0, 0, 0), "{o:#?}");
         }
 
         let s = [
@@ -123,19 +140,29 @@ mod test {
             };
         }
 
-        if let Some(i) =
-            OrderLog::new("41008412,TRUR,S,182808328809,15691327,2,6.02,5,4961481031,6.02")
-        {
-            assert!(Some(i.time) == NaiveTime::from_hms_micro_opt(18, 28, 83, 2889));
-        };
+        let o = OrderLog::new("41008412,TRUR,S,182808328809,15691327,2,6.02,5,4961481031,6.02")
+            .map(|i| i.time);
+        assert!(
+            o == NaiveTime::from_hms_micro_opt(18, 28, 8, 328809),
+            "{o:#?}"
+        );
 
-        if let Some(i) = OrderLog::new("41008406,K-RM,B,182808327717,19676999,0,4650,180,,") {
-            assert!(Some(i.time) == NaiveTime::from_hms_micro_opt(18, 28, 08, 327717));
-        };
+        let o = OrderLog::new("41008406,K-RM,B,182808327717,19676999,0,4650,180,,").map(|i| i.time);
+        assert!(
+            o == NaiveTime::from_hms_micro_opt(18, 28, 8, 327717),
+            "{o:#?}"
+        );
 
-        if let Some(i) = OrderLog::new("2897654,GE-RM,B,93239262824,1447971,1,7441,100,,") {
-            assert!(Some(i.time) == NaiveTime::from_hms_micro_opt(18, 28, 08, 327717));
-        };
-        
+        let o = OrderLog::new("2897654,GE-RM,B,100000435125,1447971,1,7441,100,,").map(|i| i.time);
+        assert!(
+            o == NaiveTime::from_hms_micro_opt(10, 0, 0, 435125),
+            "{o:#?}"
+        );
+
+        let o = OrderLog::new("2897654,GE-RM,B,93239262824,1447971,1,7441,100,,").map(|i| i.time);
+        assert!(
+            o == NaiveTime::from_hms_micro_opt(9, 32, 39, 262824),
+            "{o:#?}"
+        );
     }
 }

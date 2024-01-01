@@ -57,8 +57,8 @@ impl DerivativeOrderLog {
             "" if action_byte == "0" => Action::Cancel,
             "" if action_byte == "1" => Action::Add,
             trade_id_str => {
-                let price = iter.next()?.parse::<i64>().ok()?;
-                let id = trade_id_str.parse::<i64>().ok()?;
+                let price = iter.next()?.parse().ok()?;
+                let id = trade_id_str.parse::<u64>().ok()?;
                 Action::Trade(TradeLog { price, id })
             }
         };
