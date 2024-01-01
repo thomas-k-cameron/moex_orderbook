@@ -1,15 +1,109 @@
+use chrono::NaiveTime;
+
 use crate::crate_prelude::*;
 
-#[derive(Default)]
-pub struct OrderBook {
-    pub id: OrderBookId,
-    pub asks: Vec<OrderStack>,
-    pub bids: Vec<OrderStack>,
-    pub market_orders: Vec<DerivativeOrderLog>,
+pub trait MoexOrderLog: Sized + Send + Clone + Sync {
+    type T1: Eq + PartialEq + Ord + PartialOrd + Clone + Sized + Send + Sync;
+    type T2: Eq + PartialEq + Ord + PartialOrd + Clone + Sized + Send + Sync;
+    fn timestamp<'a>(&'a self) -> &'a Self::T1;
+    fn ticker<'a>(&'a self) -> &'a Self::T2;
+    fn side<'a>(&'a self) -> &'a Side;
+    fn price<'a>(&'a self) -> &'a Price;
+    fn order_no(&self) -> u64;
+    fn volume_mut(&mut self) -> &mut i64;
+    fn volume(&mut self) -> i64;
+    fn new_from_str(s: &str) -> Option<Self>;
 }
 
-impl OrderBook {
-    fn mut_ord_stack(&mut self, side: &Side) -> &mut Vec<OrderStack> {
+impl MoexOrderLog for DerivativeOrderLog {
+    type T1 = NaiveDateTime;
+    type T2 = Box<str>;
+
+    fn timestamp<'a>(&'a self) -> &'a Self::T1 {
+        &self.timestamp
+    }
+
+    fn new_from_str(s: &str) -> Option<Self> {
+        Self::new(s)
+    }
+
+    fn order_no(&self) -> u64 {
+        self.id
+    }
+
+    fn price<'a>(&'a self) -> &'a Price {
+        &self.price
+    }
+
+    fn side<'a>(&'a self) -> &'a Side {
+        &self.side
+    }
+
+    fn ticker<'a>(&'a self) -> &'a Self::T2 {
+        &self.name
+    }
+
+    fn volume(&mut self) -> i64 {
+        self.volume
+    }
+
+    fn volume_mut(&mut self) -> &mut i64 {
+        &mut self.volume
+    }
+}
+
+impl MoexOrderLog for OrderLog {
+    type T1 = NaiveTime;
+    type T2 = Box<str>;
+
+    fn order_no(&self) -> u64 {
+        self.orderno
+    }
+
+    fn price<'a>(&'a self) -> &'a Price {
+        &self.price
+    }
+
+    fn side<'a>(&'a self) -> &'a Side {
+        &self.buysell
+    }
+
+    fn new_from_str(s: &str) -> Option<Self> {
+        Self::new(s)
+    }
+
+    fn timestamp<'a>(&'a self) -> &'a Self::T1 {
+        &self.time
+    }
+
+    fn ticker<'a>(&'a self) -> &'a Self::T2 {
+        &self.seccode
+    }
+
+    fn volume(&mut self) -> i64 {
+        self.volume
+    }
+
+    fn volume_mut(&mut self) -> &mut i64 {
+        &mut self.volume
+    }
+}
+
+#[derive(Default)]
+pub struct OrderBook<T>
+where
+    T: MoexOrderLog,
+{
+    pub id: OrderBookId,
+    pub asks: Vec<OrderStack<T>>,
+    pub bids: Vec<OrderStack<T>>,
+}
+
+impl<T> OrderBook<T>
+where
+    T: MoexOrderLog,
+{
+    fn mut_ord_stack(&mut self, side: &Side) -> &mut Vec<OrderStack<T>> {
         let refmut = match side {
             Side::Buy => &mut self.asks,
             Side::Sell => &mut self.bids,
@@ -17,9 +111,9 @@ impl OrderBook {
         refmut
     }
 
-    pub fn add(&mut self, log: DerivativeOrderLog) {
-        let refmut = self.mut_ord_stack(&log.side);
-        let res = refmut.binary_search_by_key(&log.price.as_limit(), |a| Some(&a.price));
+    pub fn add(&mut self, log: T) {
+        let refmut = self.mut_ord_stack(&log.side());
+        let res = refmut.binary_search_by_key(&log.price().as_limit(), |a| Some(&a.price));
 
         match res {
             Ok(n) => {
@@ -28,7 +122,7 @@ impl OrderBook {
                 }
             }
             Err(n) => {
-                let limitp = log.price.as_limit().unwrap();
+                let limitp = log.price().as_limit().unwrap();
                 let mut stack = OrderStack {
                     price: *limitp,
                     map: HashMap::with_capacity(1024),
@@ -40,13 +134,17 @@ impl OrderBook {
         }
     }
 
-    pub fn remove(&mut self, log: DerivativeOrderLog) -> DerivativeOrderLog {
-        let refmut = self.mut_ord_stack(&log.side);
-        let res = refmut.binary_search_by_key(&log.price.as_limit(), |a| Some(&a.price));
+    pub fn remove(&mut self, log: T) -> T {
+        let refmut = self.mut_ord_stack(&log.side());
+        let res = refmut.binary_search_by_key(&log.price().as_limit(), |a| Some(&a.price));
         match res {
             Ok(idx) => {
                 let got = refmut.get_mut(idx).unwrap();
-                got.remove_by_id(&log.id).unwrap()
+                let item = got.remove_by_id(&log.order_no()).unwrap();
+                if got.set.len() == 0 {
+                    refmut.remove(idx);
+                }
+                item
             }
             Err(_) => {
                 unreachable!()
@@ -54,39 +152,47 @@ impl OrderBook {
         }
     }
 
-    pub fn execute(&mut self, log: DerivativeOrderLog) {
-        let refmut = self.mut_ord_stack(&log.side);
-        let res = refmut.binary_search_by_key(&log.price.as_limit(), |a| Some(&a.price));
+    pub fn execute(&mut self, mut log: T) {
+        let refmut = self.mut_ord_stack(&log.side());
+        let res = refmut.binary_search_by_key(&log.price().as_limit(), |a| Some(&a.price));
         match res {
             Ok(idx) => {
                 let got = refmut.get_mut(idx).unwrap();
-                if let Some(i) = got.map.get_mut(&log.id) {
-                    i.volume -= log.volume;
-                    return;
+                let (check, id) = if let Some(i) = got.map.get_mut(&log.order_no()) {
+                    *i.volume_mut() -= log.volume();
+                    (*i.volume_mut() == 0, i.order_no())
+                } else {
+                    unreachable!()
+                };
+                if check {
+                    got.remove_by_id(&id);
                 }
             }
-            Err(_) => {}
+            Err(_) => unreachable!()
         }
-        unreachable!()
     }
 }
 
 #[derive(Default)]
-pub struct OrderStack {
+pub struct OrderStack<T> {
     pub price: Decimal,
     /// {OrderLog::id => OrderLog}
-    pub map: HashMap<i64, DerivativeOrderLog>,
+    pub map: HashMap<u64, T>,
     /// stack is here to track order position
-    pub set: Vec<i64>,
+    pub set: Vec<u64>,
 }
 
-impl OrderStack {
-    pub(crate) fn add(&mut self, log: DerivativeOrderLog) {
-        self.set.push(log.id);
-        self.map.insert(log.id, log);
+impl<T> OrderStack<T>
+where
+    T: MoexOrderLog,
+{
+    pub(crate) fn add(&mut self, log: T) {
+        self.set.push(log.order_no());
+        self.map.insert(log.order_no(), log);
     }
 
-    pub(crate) fn remove_by_id(&mut self, id: &i64) -> Option<DerivativeOrderLog> {
+    pub(crate) fn remove_by_id(&mut self, id: &u64) -> Option<T> {
+        self.map.remove(id);
         if let Ok(idx) = self.set.binary_search_by(|item| item.cmp(&id)) {
             self.set.remove(idx);
         } else {

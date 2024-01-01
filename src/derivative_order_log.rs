@@ -7,7 +7,7 @@ pub struct DerivativeOrderLog {
     /// BUYSELL/TYPE
     pub side: Side,
     /// ORDERNO | ID
-    pub id: i64,
+    pub id: u64,
     pub action: Action,
     pub price: Price,
     pub volume: i64,
@@ -41,7 +41,7 @@ impl DerivativeOrderLog {
         let system: DerivativeType = iter.next()?.try_into().ok()?;
         let r#type = Side::from_str(iter.next()?).ok()?;
         let moment = NaiveDateTime::parse_from_str(iter.next()?, timestamp_fmt).ok()?;
-        let id = iter.next()?.parse::<i64>().ok()?;
+        let id = iter.next()?.parse::<u64>().ok()?;
         let action_byte = iter.next()?;
         let price = {
             let decimal = iter.next()?.parse::<Decimal>();
