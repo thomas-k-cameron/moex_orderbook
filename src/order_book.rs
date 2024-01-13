@@ -3,7 +3,7 @@ use chrono::NaiveTime;
 use crate::crate_prelude::*;
 
 pub trait MoexOrderLog: Sized + Send + Clone + Sync {
-    type Timestamp: Eq + PartialEq + Ord + PartialOrd + Clone + Sized + Send + Sync;
+    type Timestamp: Eq + PartialEq + Ord + PartialOrd + Clone + Sized + Send + Sync + serde::Serialize;
     fn timestamp<'a>(&'a self) -> &'a Self::Timestamp;
     fn ticker<'a>(&'a self) -> &'a str;
     fn side<'a>(&'a self) -> &'a Side;
