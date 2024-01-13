@@ -4,9 +4,8 @@ use crate::crate_prelude::*;
 
 pub trait MoexOrderLog: Sized + Send + Clone + Sync {
     type Timestamp: Eq + PartialEq + Ord + PartialOrd + Clone + Sized + Send + Sync;
-    type TickerCode: Eq + PartialEq + Ord + PartialOrd + Clone + Sized + Send + Sync;
     fn timestamp<'a>(&'a self) -> &'a Self::Timestamp;
-    fn ticker<'a>(&'a self) -> &'a Self::TickerCode;
+    fn ticker<'a>(&'a self) -> &'a str;
     fn side<'a>(&'a self) -> &'a Side;
     fn price<'a>(&'a self) -> &'a Price;
     fn order_no(&self) -> u64;
@@ -14,11 +13,15 @@ pub trait MoexOrderLog: Sized + Send + Clone + Sync {
     fn volume(&self) -> i64;
     fn new_from_str(s: &str) -> Option<Self>;
     fn action(&self) -> Action;
+    fn seq_num(&self) -> u64;
 }
 
 impl MoexOrderLog for DerivativeOrderLog {
     type Timestamp = NaiveDateTime;
-    type TickerCode = Box<str>;
+
+    fn seq_num(&self) -> u64 {
+        self.id
+    }
 
     fn timestamp<'a>(&'a self) -> &'a Self::Timestamp {
         &self.timestamp
@@ -40,7 +43,7 @@ impl MoexOrderLog for DerivativeOrderLog {
         &self.side
     }
 
-    fn ticker<'a>(&'a self) -> &'a Self::TickerCode {
+    fn ticker<'a>(&'a self) -> &'a str {
         &self.name
     }
 
@@ -59,7 +62,10 @@ impl MoexOrderLog for DerivativeOrderLog {
 
 impl MoexOrderLog for OrderLog {
     type Timestamp = NaiveTime;
-    type TickerCode = Box<str>;
+    
+    fn seq_num(&self) -> u64 {
+        self.no
+    }
 
     fn order_no(&self) -> u64 {
         self.orderno
@@ -81,7 +87,7 @@ impl MoexOrderLog for OrderLog {
         &self.time
     }
 
-    fn ticker<'a>(&'a self) -> &'a Self::TickerCode {
+    fn ticker<'a>(&'a self) -> &'a str {
         &self.seccode
     }
 
