@@ -1,3 +1,5 @@
+use std::collections::BTreeMap;
+
 use chrono::NaiveTime;
 
 use crate::crate_prelude::*;
@@ -62,7 +64,7 @@ impl MoexOrderLog for DerivativeOrderLog {
 
 impl MoexOrderLog for OrderLog {
     type Timestamp = NaiveTime;
-    
+
     fn seq_num(&self) -> u64 {
         self.no
     }
@@ -118,6 +120,14 @@ impl<T> MoexOrderBook<T>
 where
     T: MoexOrderLog,
 {
+    fn new(id: OrderBookId) -> Self {
+        Self {
+            id,
+            asks: Vec::with_capacity(1024),
+            bids: Vec::with_capacity(1024),
+        }
+    }
+
     fn mut_ord_stack(&mut self, side: &Side) -> &mut Vec<OrderStack<T>> {
         let refmut = match side {
             Side::Buy => &mut self.asks,
@@ -149,7 +159,7 @@ where
         }
     }
 
-    pub fn remove(&mut self, log: T) -> T {
+    pub fn remove(&mut self, log: &T) -> T {
         let refmut = self.mut_ord_stack(&log.side());
         let res = refmut.binary_search_by_key(&log.price().as_limit(), |a| Some(&a.price));
         match res {
@@ -167,7 +177,7 @@ where
         }
     }
 
-    pub fn execute(&mut self, log: T) {
+    pub fn execute(&mut self, log: &T) {
         let refmut = self.mut_ord_stack(&log.side());
         let res = refmut.binary_search_by_key(&log.price().as_limit(), |a| Some(&a.price));
         match res {
@@ -183,7 +193,7 @@ where
                     got.remove_by_id(&id);
                 }
             }
-            Err(_) => unreachable!()
+            Err(_) => unreachable!(),
         }
     }
 }
