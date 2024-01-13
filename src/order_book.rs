@@ -109,7 +109,7 @@ pub struct MoexOrderBook<T>
 where
     T: MoexOrderLog,
 {
-    pub id: OrderBookId,
+    pub ticker: Box<str>,
     pub asks: Vec<OrderStack<T>>,
     pub bids: Vec<OrderStack<T>>,
 }
@@ -118,9 +118,9 @@ impl<T> MoexOrderBook<T>
 where
     T: MoexOrderLog,
 {
-    fn new(id: OrderBookId) -> Self {
+    pub fn new(ticker: Box<str>) -> Self {
         Self {
-            id,
+            ticker,
             asks: Vec::with_capacity(1024),
             bids: Vec::with_capacity(1024),
         }
