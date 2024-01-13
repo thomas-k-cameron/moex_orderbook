@@ -1,9 +1,6 @@
 use std::str::FromStr;
 
-use chrono::{
-    NaiveTime,
-    Timelike,
-};
+use chrono::NaiveTime;
 
 use crate::*;
 

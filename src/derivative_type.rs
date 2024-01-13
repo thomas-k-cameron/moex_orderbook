@@ -1,4 +1,16 @@
-#[derive(Debug, Default, serde::Serialize, Clone, Copy, serde::Deserialize, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(
+    Debug,
+    Default,
+    serde::Serialize,
+    Clone,
+    Copy,
+    serde::Deserialize,
+    PartialEq,
+    Eq,
+    PartialOrd,
+    Ord,
+    Hash,
+)]
 pub enum DerivativeType {
     #[default]
     Put,

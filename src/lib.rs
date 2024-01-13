@@ -27,8 +27,8 @@ use rust_decimal::Decimal;
 mod order_book;
 pub use order_book::{
     MoexOrderBook,
+    MoexOrderLog,
     OrderStack,
-    MoexOrderLog
 };
 
 mod order_log;
