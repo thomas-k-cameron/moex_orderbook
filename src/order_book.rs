@@ -1,3 +1,5 @@
+use std::fmt::Debug;
+
 use chrono::NaiveTime;
 
 use crate::crate_prelude::*;
@@ -116,7 +118,7 @@ where
 
 impl<T> MoexOrderBook<T>
 where
-    T: MoexOrderLog,
+    T: MoexOrderLog + Debug,
 {
     pub fn new(ticker: Box<str>) -> Self {
         Self {
@@ -170,7 +172,7 @@ where
                 item
             }
             Err(_) => {
-                unreachable!()
+                unreachable!("{log:#?}");
             }
         }
     }
@@ -185,13 +187,13 @@ where
                     *i.volume_mut() -= log.volume();
                     (*i.volume_mut() == 0, i.order_no())
                 } else {
-                    unreachable!()
+                    unreachable!("{log:#?}");
                 };
                 if check {
                     got.remove_by_id(&id);
                 }
             }
-            Err(_) => unreachable!(),
+            Err(_) => unreachable!("{log:#?}"),
         }
     }
 }
